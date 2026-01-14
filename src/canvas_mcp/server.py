@@ -3,9 +3,8 @@
 Canvas MCP Server
 
 A Model Context Protocol server for Canvas LMS integration.
-Provides educators and students with AI-powered tools for course management,
-assignment handling, discussion facilitation, student analytics, and personal
-academic tracking.
+Provides students with AI-powered tools for tracking assignments, grades,
+discussions, and course content.
 """
 
 import argparse
@@ -17,17 +16,14 @@ from .core.config import get_config, validate_config
 from .core.logging import log_error, log_info
 from .resources import register_resources_and_prompts
 from .tools import (
-    register_accessibility_tools,
     register_assignment_tools,
     register_code_execution_tools,
     register_course_tools,
     register_discovery_tools,
     register_discussion_tools,
-    register_messaging_tools,
+    register_file_tools,
     register_other_tools,
-    register_peer_review_comment_tools,
-    register_peer_review_tools,
-    register_rubric_tools,
+    register_quiz_tools,
     register_student_tools,
 )
 
@@ -43,17 +39,14 @@ def register_all_tools(mcp: FastMCP) -> None:
     """Register all MCP tools, resources, and prompts."""
     log_info("Registering Canvas MCP tools...")
 
-    # Register tools by category
+    # Register student-focused tools
+    register_student_tools(mcp)
     register_course_tools(mcp)
     register_assignment_tools(mcp)
     register_discussion_tools(mcp)
     register_other_tools(mcp)
-    register_rubric_tools(mcp)
-    register_peer_review_tools(mcp)
-    register_peer_review_comment_tools(mcp)
-    register_messaging_tools(mcp)
-    register_student_tools(mcp)
-    register_accessibility_tools(mcp)
+    register_file_tools(mcp)
+    register_quiz_tools(mcp)
     register_discovery_tools(mcp)
     register_code_execution_tools(mcp)
 
