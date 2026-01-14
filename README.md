@@ -1,8 +1,8 @@
-# Canvas MCP Server
+# Canvas MCP Server (For Students)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-MCP server for Canvas LMS. Helps students track assignments, grades, due dates, and course content through AI assistants like Claude Desktop.
+MCP server for Canvas LMS **built for students**. Track assignments, grades, due dates, take quizzes, and access course content through AI assistants like Claude Desktop.
 
 ## What Can It Do?
 
@@ -11,6 +11,8 @@ MCP server for Canvas LMS. Helps students track assignments, grades, due dates, 
 - "What's on my Canvas TODO list?"
 - "Show me the syllabus for [course]"
 - "Download the lecture slides"
+- "What quizzes are in [course]?"
+- "Help me take the practice quiz"
 
 ## Quick Start
 
@@ -67,6 +69,7 @@ Restart Claude Desktop and try: "What courses am I enrolled in?"
 | **Personal** | `get_my_upcoming_assignments`, `get_my_course_grades`, `get_my_todo_items`, `get_my_submission_status`, `get_my_peer_reviews_todo` |
 | **Courses** | `list_courses`, `get_course_details`, `get_course_content_overview` |
 | **Assignments** | `list_assignments`, `get_assignment_details` |
+| **Quizzes** | `list_quizzes`, `get_quiz_details`, `start_quiz`, `get_quiz_questions`, `answer_quiz_question` |
 | **Discussions** | `list_discussion_topics`, `list_announcements`, `post_discussion_entry`, `reply_to_discussion_entry` |
 | **Content** | `list_pages`, `get_page_content`, `list_modules`, `list_module_items` |
 | **Files** | `list_course_files`, `download_file` |
