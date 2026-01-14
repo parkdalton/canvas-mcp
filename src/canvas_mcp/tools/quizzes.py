@@ -2,7 +2,6 @@
 
 import json
 import re
-from typing import Any
 
 from mcp.server.fastmcp import FastMCP
 
@@ -398,7 +397,7 @@ def register_quiz_tools(mcp: FastMCP):
         attempt: int,
         validation_token: str,
         question_id: int,
-        answer: Any
+        answer: str | int | float | list | dict
     ) -> str:
         """Submit an answer to a quiz question.
 
