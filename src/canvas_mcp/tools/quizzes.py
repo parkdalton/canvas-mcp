@@ -432,7 +432,7 @@ def register_quiz_tools(mcp: FastMCP):
         response = await make_canvas_request(
             "post",
             f"/quiz_submissions/{quiz_submission_id}/questions",
-            json=payload
+            data=payload
         )
 
         if "error" in response:
