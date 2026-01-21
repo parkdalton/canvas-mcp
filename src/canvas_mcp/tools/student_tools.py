@@ -30,7 +30,6 @@ def register_student_tools(mcp: FastMCP):
         """
         # Calculate the date range (use UTC to match parse_date which returns UTC)
         end_date = datetime.now(timezone.utc) + timedelta(days=days)
-        end_date_str = end_date.strftime("%Y-%m-%d")
 
         # Get upcoming events for the current user
         events = await fetch_all_paginated_results(
@@ -60,6 +59,32 @@ def register_student_tools(mcp: FastMCP):
         if not assignments:
             return f"No assignments due in the next {days} days."
 
+        # Group assignments by course_id to fetch submissions efficiently
+        assignments_by_course: dict[int, list] = {}
+        for assignment in assignments:
+            course_id = assignment.get("course_id")
+            if course_id:
+                if course_id not in assignments_by_course:
+                    assignments_by_course[course_id] = []
+                assignments_by_course[course_id].append(assignment)
+
+        # Fetch submission status for each course's assignments
+        # /courses/:course_id/students/submissions returns current user's submissions when student_ids is omitted
+        submission_status: dict[int, dict] = {}  # assignment_id -> submission data
+        for course_id, course_assignments in assignments_by_course.items():
+            assignment_ids = [str(a.get("id")) for a in course_assignments if a.get("id")]
+            if assignment_ids:
+                submissions = await make_canvas_request(
+                    "get",
+                    f"/courses/{course_id}/students/submissions",
+                    params={"assignment_ids[]": assignment_ids, "per_page": 100}
+                )
+                if isinstance(submissions, list):
+                    for sub in submissions:
+                        aid = sub.get("assignment_id")
+                        if aid:
+                            submission_status[aid] = sub
+
         # Sort by due date
         assignments.sort(key=lambda x: parse_date(x.get("due_at", "")) or datetime.max.replace(tzinfo=timezone.utc))
 
@@ -70,12 +95,13 @@ def register_student_tools(mcp: FastMCP):
             name = assignment.get("name", "Unnamed Assignment")
             due_at = format_date(assignment.get("due_at"))
             course_id = assignment.get("course_id")
+            assignment_id = assignment.get("id")
 
             # Get course name
             course_display = await get_course_code(course_id) if course_id else "Unknown Course"
 
-            # Get submission status
-            submission = assignment.get("submission")
+            # Get submission status from fetched data
+            submission = submission_status.get(assignment_id)
             if submission:
                 submitted = submission.get("submitted_at") is not None
                 status = "✅ Submitted" if submitted else "❌ Not Submitted"
