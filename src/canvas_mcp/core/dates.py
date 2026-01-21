@@ -66,16 +66,17 @@ def parse_date(date_str: str | None) -> datetime.datetime | None:
 
 
 def format_date(date_str: str | None) -> str:
-    """Format a date string to ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ) or return 'N/A' if None.
+    """Format a date string showing both local time and UTC.
 
-    All dates are converted to ISO 8601 format for consistency across the API.
-    Timezone information is preserved if present, otherwise UTC is assumed.
+    Returns dates in format: "2026-01-21 23:59 CST (2026-01-22T05:59:59Z)"
+    This shows local time first for user readability, with UTC in parentheses
+    so Claude can understand the exact time context.
 
     Args:
         date_str: The date string to format
 
     Returns:
-        Formatted date string in ISO 8601 format or 'N/A' if None
+        Formatted date string with local time and UTC, or 'N/A' if None
     """
     if not date_str:
         return "N/A"
@@ -84,11 +85,14 @@ def format_date(date_str: str | None) -> str:
     if not dt:
         return date_str  # Return original if parsing fails
 
-    # Format to ISO 8601 with Z for UTC or offset for other timezones
-    if dt.tzinfo == datetime.timezone.utc:
-        return dt.strftime('%Y-%m-%dT%H:%M:%SZ')
-    else:
-        return dt.strftime('%Y-%m-%dT%H:%M:%S%z')
+    # Convert to local timezone
+    local_tz = datetime.datetime.now().astimezone().tzinfo
+    local_dt = dt.astimezone(local_tz)
+
+    # Format: "2026-01-21 23:59 CST (2026-01-22T05:59:59Z)"
+    local_str = local_dt.strftime('%Y-%m-%d %H:%M %Z')
+    utc_str = dt.astimezone(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+    return f"{local_str} ({utc_str})"
 
 
 def truncate_text(text: str, max_length: int = 100) -> str:
