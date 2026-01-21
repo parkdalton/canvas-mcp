@@ -4,7 +4,7 @@ These tools provide student-focused functionality using Canvas API "/self" endpo
 to access only the student's own data across their enrolled courses.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from mcp.server.fastmcp import FastMCP
@@ -28,8 +28,8 @@ def register_student_tools(mcp: FastMCP):
         Returns upcoming assignments due within the specified timeframe,
         sorted by due date, with submission status.
         """
-        # Calculate the date range
-        end_date = datetime.now() + timedelta(days=days)
+        # Calculate the date range (use UTC to match parse_date which returns UTC)
+        end_date = datetime.now(timezone.utc) + timedelta(days=days)
         end_date_str = end_date.strftime("%Y-%m-%d")
 
         # Get upcoming events for the current user
@@ -61,7 +61,7 @@ def register_student_tools(mcp: FastMCP):
             return f"No assignments due in the next {days} days."
 
         # Sort by due date
-        assignments.sort(key=lambda x: parse_date(x.get("due_at", "")) or datetime.max)
+        assignments.sort(key=lambda x: parse_date(x.get("due_at", "")) or datetime.max.replace(tzinfo=timezone.utc))
 
         # Format output
         output_lines = [f"Upcoming Assignments (Next {days} Days):\n"]
@@ -164,7 +164,7 @@ def register_student_tools(mcp: FastMCP):
                 due_at = assignment.get("due_at")
                 if due_at:
                     due_date = parse_date(due_at)
-                    if due_date and due_date < datetime.now():
+                    if due_date and due_date < datetime.now(timezone.utc):
                         missing.append((assignment, "OVERDUE"))
                     else:
                         missing.append((assignment, "NOT SUBMITTED"))
