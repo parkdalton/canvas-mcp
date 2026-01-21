@@ -82,9 +82,12 @@ async def get_course_id(course_identifier: str | int) -> str | None:
     return course_str
 
 
-async def get_course_code(course_id: str) -> str | None:
+async def get_course_code(course_id: str | int) -> str | None:
     """Get course code from ID, with caching."""
     global id_to_course_code_cache, course_code_to_id_cache
+
+    # Convert to string for consistent handling (Canvas API returns int)
+    course_id = str(course_id)
 
     # If it's already a code-like string with underscores
     if "_" in course_id:
@@ -102,7 +105,7 @@ async def get_course_code(course_id: str) -> str | None:
 
     # If we can't find a code, try to fetch the course directly
     response = await make_canvas_request("get", f"/courses/{course_id}")
-    if "error" not in response and "course_code" in response:
+    if isinstance(response, dict) and "error" not in response and "course_code" in response:
         code = response.get("course_code", "")
         # Update our cache
         if code:
